@@ -18,6 +18,13 @@ This file stores reusable FCPXML findings with explicit evidence labels. Do not 
 - Evidence: repository implementation uses exclusive destination creation for the non-overwrite path and has a regression test for existing-output protection.
 - Limit: filesystem semantics can still fail due to permissions or unusual filesystems; the tool reports the error rather than replacing the target.
 
+### Edit plans produce inputs compatible with the repository's FCPXML generator contract
+
+- Date: 2026-08-16
+- Scope: repository interfaces only
+- Evidence: `edit_plan_build` emits `fcpxmlClips` containing the same path, source-start, duration, name, and audio fields accepted by `fcpxml_create_project`; direct tests and MCP CI pass on Node.js 20 and 22.
+- Limit: interface compatibility does not prove Final Cut Pro application compatibility.
+
 ## observed
 
 No retained real Final Cut Pro round-trip observations yet.
@@ -34,8 +41,9 @@ No retained real Final Cut Pro round-trip observations yet.
 
 - Which Final Cut Pro versions should be declared supported.
 - Which generated structures Final Cut normalizes on export for the target version.
+- Whether generated FCPXML and SRT share the expected timeline origin after import.
 - Whether future title, caption, role, transform, speed, and transition structures will round-trip without semantic loss.
 
 ## Next evidence needed
 
-Follow `.claude/skills/fcpxml-roundtrip/SKILL.md` on the target Mac and retain the generated/exported files under `test/fixtures/roundtrip/`.
+Follow `.claude/skills/fcpxml-roundtrip/SKILL.md` on the target Mac and retain the generated/exported files under `test/fixtures/roundtrip/`. Include the generated SRT and subtitle-alignment notes for the 0.2 editing pipeline.
