@@ -22,13 +22,24 @@ Use these labels in research notes and status updates:
 
 For Apple Pro Video behavior, automated XML/unit tests alone do not make an app-compatibility claim `confirmed`. Final Cut Pro or Motion behavior must be observed on an actual Mac before it is described as working in-app.
 
+For editing behavior, distinguish four layers:
+
+1. candidate assessments supplied by a model or human;
+2. deterministic ranking and retiming performed by this repository;
+3. ASR output supplied by an external transcription system;
+4. actual Final Cut import and timeline alignment observed in the app.
+
+Never collapse those layers into a claim that the MCP watched, understood, transcribed, or successfully edited media unless the relevant tool/app evidence exists.
+
 ## Definition of done
 
 Do not call a change done merely because code was written.
 
 - code change: relevant tests pass;
-- MCP change: stdio handshake/tool invocation passes;
+- MCP change: stdio handshake/tool listing and a relevant tool invocation pass;
+- ranking/plan/subtitle change: direct unit tests and MCP integration pass;
 - FCPXML behavior: structural tests pass, and app compatibility remains `unverified` until a Final Cut import/export round trip succeeds;
+- subtitle behavior: SRT generation may be repository-confirmed, while Final Cut import/alignment remains `unverified` until inspected in-app;
 - Motion behavior: XML inspection tests pass, and mutation remains `unverified` until a real Motion/Final Cut round trip succeeds.
 
 ## Checkpoint
