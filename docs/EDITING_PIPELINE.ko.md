@@ -195,6 +195,29 @@ interview-selects.fcpxml
 interview-selects.srt
 ```
 
+## 6. Grok에 넘길 때 사용할 지시문
+
+Grok을 저장소 루트에서 실행한 뒤 다음과 같이 시킵니다.
+
+```text
+AGENTS.md, memory/CHECKPOINT.md, memory/DECISIONS.md,
+memory/knowledge/editing.md를 먼저 읽어.
+
+npm install && npm run check를 실행하고
+Apple Pro Video MCP의 11개 도구를 확인해.
+
+테스트용 인터뷰 영상의 단어별 타임스탬프를 준비한 뒤
+highlight_rank → edit_plan_build → fcpxml_create_project,
+subtitle_segment → subtitle_write_srt 순서로 실행해.
+
+.claude/skills/fcpxml-roundtrip/SKILL.md 절차에 따라
+생성한 FCPXML과 SRT를 disposable Final Cut 라이브러리에 import하고,
+컷 순서·in-point·길이·자막 정렬을 검사해.
+
+실패한 경우 오류 메시지와 생성/재export 파일을 보존하고,
+추측으로 호환성을 선언하지 말고 테스트와 코드를 수정해.
+```
+
 ## 현재 검증 경계
 
 저장소 테스트가 확인하는 것:
