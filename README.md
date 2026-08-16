@@ -4,7 +4,7 @@ A local Model Context Protocol server for Final Cut Pro FCPXML, transparent edit
 
 > **MVP status:** repository and MCP protocol behavior are covered by automated tests. Real Final Cut Pro import/export and Motion round-trip compatibility remain unverified until retained fixtures are produced on an editing Mac.
 
-[한국어 안내](README.ko.md) · [편집 판단·자막 파이프라인](docs/EDITING_PIPELINE.ko.md)
+[한국어 안내](README.ko.md) · [Editing pipeline](docs/EDITING_PIPELINE.md) · [편집 판단·자막 파이프라인](docs/EDITING_PIPELINE.ko.md)
 
 ## Tools
 
@@ -101,7 +101,7 @@ external transcript/analysis
       └─ timelineWords → subtitle_segment → subtitle_write_srt
 ```
 
-See [`docs/EDITING_PIPELINE.ko.md`](docs/EDITING_PIPELINE.ko.md) for metrics, profiles, JSON examples, Korean subtitle settings, and the current verification boundary.
+See [`docs/EDITING_PIPELINE.md`](docs/EDITING_PIPELINE.md) or [`docs/EDITING_PIPELINE.ko.md`](docs/EDITING_PIPELINE.ko.md) for metrics, profiles, JSON examples, Korean subtitle settings, and the current verification boundary.
 
 ## Motion workflow
 
