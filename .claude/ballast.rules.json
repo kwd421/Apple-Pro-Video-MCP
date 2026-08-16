@@ -17,7 +17,7 @@
         "keywords": ["overwrite", "delete", "replace", "import", "export", "project", "library", "덮어", "삭제", "프로젝트"]
       },
       "action": "inject",
-      "body": "Treat user media, libraries, projects, templates, and exports as valuable data. Default to non-destructive copies and unique output paths. Require an explicit overwrite/delete instruction before replacing existing artifacts."
+      "body": "Treat user media, libraries, projects, templates, subtitles, and exports as valuable data. Default to non-destructive copies and unique output paths. Require an explicit overwrite/delete instruction before replacing existing artifacts."
     },
     {
       "id": "no-shell-interpolation",
@@ -45,6 +45,24 @@
       },
       "action": "inject",
       "body": "Do not introduce generic Motion project mutation from guessed XML structure. First capture representative real templates and a successful Motion/Final Cut round trip, then make the mutation schema-specific and tested."
+    },
+    {
+      "id": "analysis-inputs-are-not-observations",
+      "title": "Do not claim the MCP watched or transcribed media",
+      "when": {
+        "keywords": ["highlight", "score", "transcript", "transcribe", "ASR", "좋은 부분", "전사", "점수", "영상 분석"]
+      },
+      "action": "inject",
+      "body": "highlight_rank and edit_plan_build operate on caller-supplied assessments, ranges, and timestamps. Do not say the MCP watched, understood, or transcribed media unless a separate media-analysis tool actually ran and its evidence is recorded."
+    },
+    {
+      "id": "subtitle-generation-is-not-finalcut-import",
+      "title": "Separate SRT generation from Final Cut subtitle compatibility",
+      "when": {
+        "keywords": ["subtitle", "caption", "SRT", "자막", "캡션"]
+      },
+      "action": "inject",
+      "body": "Repository tests may confirm cue segmentation, SRT rendering, and protected file writes. Do not claim subtitle alignment or Final Cut import compatibility until the generated SRT has been imported with the generated timeline and inspected on an actual Mac."
     }
   ]
 }
