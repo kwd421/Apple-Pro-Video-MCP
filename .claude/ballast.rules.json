@@ -17,7 +17,7 @@
         "keywords": ["overwrite", "delete", "replace", "import", "export", "project", "library", "덮어", "삭제", "프로젝트"]
       },
       "action": "inject",
-      "body": "Treat user media, libraries, projects, templates, subtitles, and exports as valuable data. Default to non-destructive copies and unique output paths. Require an explicit overwrite/delete instruction before replacing existing artifacts."
+      "body": "Treat user media, libraries, projects, templates, subtitles, transcripts, and exports as valuable data. Default to non-destructive copies and unique output paths. Require an explicit overwrite/delete instruction before replacing existing artifacts."
     },
     {
       "id": "no-shell-interpolation",
@@ -53,7 +53,16 @@
         "keywords": ["highlight", "score", "transcript", "transcribe", "ASR", "좋은 부분", "전사", "점수", "영상 분석"]
       },
       "action": "inject",
-      "body": "highlight_rank and edit_plan_build operate on caller-supplied assessments, ranges, and timestamps. Do not say the MCP watched, understood, or transcribed media unless a separate media-analysis tool actually ran and its evidence is recorded."
+      "body": "highlight_rank and edit_plan_build operate on supplied assessments, ranges, and timestamps. vibe_transcript_import proves only that a JSON artifact was parsed and normalized. Do not say the MCP watched, understood, or accurately transcribed media unless the Vibe runtime or another media-analysis tool actually ran and its evidence is recorded."
+    },
+    {
+      "id": "vibe-integration-is-schema-boundary",
+      "title": "Keep Vibe integration behind the versioned exchange contract",
+      "when": {
+        "keywords": ["Vibe", "vibe_transcript_import", "vibe-video-analyzer/transcript", "transcribe_cli.py", "VibeCoding_VideoAnalyzer"]
+      },
+      "action": "inject",
+      "body": "Integrate Vibe through vibe-video-analyzer/transcript schema v1. Do not couple the Node MCP to Vibe GUI state or import its Python runtime. Preserve Vibe's existing timing, playback, and word-highlight code unless a separate isolated experiment with real-media validation is explicitly requested."
     },
     {
       "id": "subtitle-generation-is-not-finalcut-import",
