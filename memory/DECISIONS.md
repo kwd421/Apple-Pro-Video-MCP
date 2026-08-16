@@ -1,19 +1,29 @@
 # Decisions
 
-## D-001 — Use the official MCP SDK v2
-- Date: 2026-08-16
-- Status: active
-- Decision: Use `@modelcontextprotocol/server` v2 and its stdio entry point instead of maintaining a custom MCP protocol implementation.
-- Reason: MCP protocol negotiation and compatibility evolve independently from Apple Pro Video domain logic.
+## D-001 — Official MCP TypeScript SDK v2
 
-## D-002 — Keep Motion mutation out of the MVP
-- Date: 2026-08-16
-- Status: active
-- Decision: Motion support is read-only template discovery and XML inspection.
-- Reason: Project-file mutation is not promoted until real Motion and Final Cut round-trip fixtures prove the relevant fields and installation behavior.
+Status: active  
+Date: 2026-08-16
 
-## D-003 — Label FCPXML validation as structural
-- Date: 2026-08-16
-- Status: active
-- Decision: The built-in XML and reference checks are structural validation, not full Apple DTD conformance.
-- Reason: Avoid overstating compatibility without app-level import/export verification.
+Use `@modelcontextprotocol/server` v2 with its stdio entry point. Use Zod v4 schemas for tool validation. This keeps protocol negotiation and transport behavior aligned with the maintained MCP implementation.
+
+## D-002 — FCPXML writes; Motion reads
+
+Status: active  
+Date: 2026-08-16
+
+The first release may create and open FCPXML. Motion project files remain inspection-only until mutations have passed real Motion and Final Cut Pro round-trip checks.
+
+## D-003 — No shell interpolation
+
+Status: active  
+Date: 2026-08-16
+
+External commands are invoked with executable/argument arrays. User-provided paths are never embedded in a shell command.
+
+## D-004 — Structural XML validation is labeled accurately
+
+Status: active  
+Date: 2026-08-16
+
+`fcpxml_validate` checks well-formed XML, IDs, references, time syntax, and core structure. It must not be described as a complete validation against every Apple FCPXML DTD rule.

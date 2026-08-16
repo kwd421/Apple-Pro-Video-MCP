@@ -1,35 +1,34 @@
 # Apple Pro Video MCP
 
-macOS에서 Final Cut Pro의 FCPXML 작업과 Apple Motion 템플릿 조사를 MCP 도구로 제공하는 로컬 stdio 서버입니다.
+A local Model Context Protocol server for Final Cut Pro FCPXML and Apple Motion template workflows on macOS.
 
-> **MVP 상태:** FCPXML 생성·구조 검사, Motion 템플릿 읽기, 공식 MCP SDK v2 기반 stdio 서버가 구현되어 있습니다. 실제 Final Cut Pro import/export round trip과 실제 Motion 템플릿 fixture 검증은 편집용 Mac에서 추가로 수행해야 합니다.
+> **MVP status:** the MCP server, XML parser, FCPXML generator, filesystem safeguards, and automated tests are implemented. A real Final Cut Pro import/export round trip and real Motion project fixtures still need to be verified on an editing Mac.
 
-## 현재 제공 도구
+## Available tools
 
-| 도구 | 기능 | 변경 여부 |
-|---|---|---:|
-| `system_capabilities` | macOS, Node, Final Cut Pro, Motion, 명령 및 템플릿 폴더 확인 | 읽기 전용 |
-| `fcpxml_validate` | XML 구조, FCPXML root/version, ID, 참조, 시간 값 검사 | 읽기 전용 |
-| `fcpxml_inspect` | 프로젝트·이벤트·클립·타이틀·마커·리소스 요약 | 읽기 전용 |
-| `fcpxml_create_project` | 로컬 미디어 목록으로 FCPXML 1.11 프로젝트 생성 | 파일 생성 |
-| `finalcut_open_fcpxml` | `.fcpxml` 또는 `.fcpxmld`를 Final Cut Pro에서 열기 | 앱 실행 |
-| `motion_list_templates` | `.moti`, `.motr`, `.moef`, `.motn` 검색 | 읽기 전용 |
-| `motion_inspect_template` | Motion XML 메타데이터와 publish 후보 조사 | 읽기 전용 |
+| Tool | Purpose | Side effect |
+|---|---|---|
+| `system_capabilities` | Detect macOS, Node.js, Final Cut Pro, Motion, helper commands, and template roots | Read-only |
+| `fcpxml_validate` | Check XML structure, FCPXML root/version, IDs, references, and time values | Read-only |
+| `fcpxml_inspect` | Summarize projects, events, clips, titles, markers, resources, and durations | Read-only |
+| `fcpxml_create_project` | Generate a frame-quantized FCPXML project from local media paths | Creates `.fcpxml` |
+| `finalcut_open_fcpxml` | Open an `.fcpxml` file or `.fcpxmld` bundle in Final Cut Pro | Launches app/import UI |
+| `motion_list_templates` | Find installed `.moti`, `.motr`, `.moef`, and `.motn` templates | Read-only |
+| `motion_inspect_template` | Inspect Motion XML metadata and publish-like parameters | Read-only |
 
-Motion 프로젝트 수정·설치는 아직 넣지 않았습니다. 실제 Motion/Final Cut round trip으로 포맷 동작을 검증하기 전까지 읽기 전용으로 유지합니다.
+Motion mutation is intentionally excluded from the first release. The MCP can inspect Motion project files, but it will not rewrite or install them until the behavior is verified with real Motion and Final Cut Pro round trips.
 
-## 요구 사항
+## Requirements
 
-- macOS
-- Node.js 20 이상
-- Final Cut Pro: `finalcut_open_fcpxml`을 사용할 때 필요
-- Motion: 실제 설치 템플릿을 조사할 때 필요
+- macOS for Final Cut Pro launching and the standard Motion template locations
+- Node.js 20 or later
+- Final Cut Pro and Motion are optional for XML-only tools
 
-서버는 공식 `@modelcontextprotocol/server` v2와 Zod v4를 사용합니다.
+The server uses the official MCP TypeScript SDK v2 and Zod for tool schemas.
 
-## 1. 설치
+## Install
 
-초기 PR이 병합되기 전에는 기능 브랜치를 사용합니다.
+Until the initial pull request is merged, use the feature branch:
 
 ```bash
 git clone https://github.com/kwd421/Apple-Pro-Video-MCP.git
@@ -40,17 +39,9 @@ npm install
 npm run check
 ```
 
-서버를 직접 실행하려면:
+## Connect an MCP client
 
-```bash
-npm start
-```
-
-stdio 서버이므로 시작 후 터미널에서 입력을 기다리는 것이 정상입니다. 프로토콜은 stdout, 진단 로그는 stderr를 사용합니다.
-
-## 2. MCP 클라이언트에 등록
-
-`src/index.js`의 **절대 경로**를 MCP 클라이언트 설정에 넣습니다.
+Use an absolute path to `src/index.js`:
 
 ```json
 {
@@ -65,64 +56,60 @@ stdio 서버이므로 시작 후 터미널에서 입력을 기다리는 것이 �
 }
 ```
 
-[`mcp-config.example.json`](mcp-config.example.json)도 같은 형태입니다. 설정을 저장한 뒤 MCP 호스트를 완전히 종료했다가 다시 실행합니다.
+A template is included in [`mcp-config.example.json`](mcp-config.example.json). Save the configuration and fully restart the MCP host.
 
-MCP Inspector로 먼저 확인할 수도 있습니다.
+The server sends protocol traffic only through stdout. Startup and error diagnostics go to stderr, so they do not corrupt the MCP stdio stream.
+
+## Run it directly
+
+```bash
+npm start
+```
+
+The process waits for an MCP client on stdin/stdout. To open the official MCP Inspector:
 
 ```bash
 npm run inspect
 ```
 
-## 3. 첫 실행
+The Inspector command may download its own package the first time it runs.
 
-연결된 모델에 다음처럼 요청합니다.
+## First use
 
-```text
-apple-pro-video의 system_capabilities를 실행해서
-Final Cut Pro, Motion, 템플릿 폴더가 이 Mac에 있는지 알려줘.
-```
-
-정상이라면 플랫폼, Node 버전, 앱 경로, 기본 Motion Templates 폴더가 JSON으로 반환됩니다.
-
-## 4. 기존 FCPXML 검사
+Check the Mac before editing anything:
 
 ```text
-/Users/me/Desktop/sample.fcpxml을 validate하고 inspect해줘.
-깨진 리소스 참조, 프로젝트 이름, 클립과 타이틀 개수를 알려줘.
+Call system_capabilities. Tell me whether Final Cut Pro and Motion are installed,
+and show the Motion template roots that exist.
 ```
 
-직접 도구 인자를 쓸 때:
-
-```json
-{
-  "path": "/Users/me/Desktop/sample.fcpxml"
-}
-```
-
-`.fcpxmld` 번들도 받을 수 있습니다. 번들 내부의 `Info.fcpxml` 또는 첫 번째 `.fcpxml` 문서를 제한된 깊이로 찾습니다.
-
-XML 문자열을 파일 없이 검사할 수도 있습니다.
-
-```json
-{
-  "xml": "<!DOCTYPE fcpxml><fcpxml version=\"1.11\"><resources/></fcpxml>"
-}
-```
-
-`path`와 `xml` 중 정확히 하나만 전달해야 합니다.
-
-## 5. 새 Final Cut 프로젝트 생성
-
-자연어 예시:
+Validate and inspect an export:
 
 ```text
-/Users/me/Desktop/interview-selects.fcpxml을 만들어줘.
-프로젝트 이름은 Interview Selects, 프레임레이트는 29.97.
-A001.mov 처음 12.5초 다음에 A002.mov 3초 지점부터 8초를 이어 붙여줘.
-기존 파일은 덮어쓰지 마.
+Validate and inspect /Users/me/Desktop/sample.fcpxml.
+Report unresolved references, project names, clip counts, markers, titles,
+and sequence durations.
 ```
 
-동일한 `fcpxml_create_project` 인자:
+Both FCPXML tools accept either an absolute/`~/` path or inline XML. Exactly one must be provided.
+
+## Create an FCPXML project
+
+Natural-language example:
+
+```text
+Create /Users/me/Desktop/interview-selects.fcpxml.
+Project name: Interview Selects
+Event name: AI Edits
+Frame rate: 29.97
+Resolution: 1920x1080
+Use these clips in order:
+- /Users/me/Movies/A001.mov, use the first 12.5 seconds
+- /Users/me/Movies/A002.mov, start at 3 seconds and use 8 seconds
+Do not overwrite an existing file.
+```
+
+Equivalent `fcpxml_create_project` arguments:
 
 ```json
 {
@@ -133,7 +120,6 @@ A001.mov 처음 12.5초 다음에 A002.mov 3초 지점부터 8초를 이어 붙�
   "width": 1920,
   "height": 1080,
   "overwrite": false,
-  "allowMissingMedia": false,
   "clips": [
     {
       "path": "/Users/me/Movies/A001.mov",
@@ -142,52 +128,51 @@ A001.mov 처음 12.5초 다음에 A002.mov 3초 지점부터 8초를 이어 붙�
     {
       "path": "/Users/me/Movies/A002.mov",
       "sourceStartSeconds": 3,
-      "durationSeconds": 8,
-      "hasAudio": true
+      "durationSeconds": 8
     }
   ]
 }
 ```
 
-지원 프레임레이트:
+Supported frame rates are `23.976`, `24`, `25`, `29.97`, `30`, `50`, `59.94`, and `60`. Durations and source starts are rounded to the nearest frame and written as exact rational FCP times.
+
+Every media path must exist by default. Use `allowMissingMedia: true` only when intentionally creating an offline-media project.
+
+Then ask:
 
 ```text
-23.976, 24, 25, 29.97, 30, 50, 59.94, 60
+Open /Users/me/Desktop/interview-selects.fcpxml in Final Cut Pro.
 ```
 
-중요한 동작:
+The launch tool invokes `/usr/bin/open` with an argument array. It never embeds a user path in a shell command.
 
-- 경로는 절대 경로이거나 `~/`로 시작해야 합니다.
-- 미디어 파일은 기본적으로 실제 존재해야 합니다.
-- 오프라인 미디어 프로젝트를 의도한 경우에만 `allowMissingMedia: true`를 사용합니다.
-- `durationSeconds`와 `sourceStartSeconds`는 선택한 프레임레이트의 프레임 경계로 반올림됩니다.
-- 기존 출력 파일은 `overwrite: true`가 없으면 보존됩니다.
+## Work with FCPXML bundles
 
-생성 후 Final Cut에서 열기:
+`fcpxml_validate`, `fcpxml_inspect`, and `finalcut_open_fcpxml` accept both:
 
 ```text
-/Users/me/Desktop/interview-selects.fcpxml을 Final Cut Pro에서 열어줘.
+/absolute/path/Project.fcpxml
+/absolute/path/Project.fcpxmld
 ```
 
-또는 직접 호출:
+For `.fcpxmld`, the reader prefers `Info.fcpxml`, then performs a bounded search inside the bundle without following symbolic links.
 
-```json
-{
-  "path": "/Users/me/Desktop/interview-selects.fcpxml"
-}
-```
+## Inspect Motion templates
 
-이 도구는 셸 문자열을 만들지 않고 다음과 동등한 인자 배열 실행을 사용합니다.
+List titles:
 
 ```text
-/usr/bin/open -a "Final Cut Pro" /absolute/path/interview-selects.fcpxml
+List Motion templates of kind title. Limit the result to 100.
 ```
 
-Final Cut의 import 확인 창에서 사용자가 내용을 확인하고 승인합니다.
+Inspect a template:
 
-## 6. Motion 템플릿 검색과 조사
+```text
+Inspect this Motion title and list publish-like parameters:
+/Users/me/Movies/Motion Templates.localized/Titles/Custom/Lower Third/Lower Third.moti
+```
 
-기본 검색 폴더:
+Default search roots:
 
 ```text
 ~/Movies/Motion Templates.localized
@@ -196,73 +181,30 @@ Final Cut의 import 확인 창에서 사용자가 내용을 확인하고 승인�
 /Library/Application Support/Final Cut Pro/Templates
 ```
 
-타이틀만 100개까지 찾기:
+Supported extensions:
 
-```json
-{
-  "kinds": ["title"],
-  "maxResults": 100,
-  "maxDepth": 8
-}
-```
+| Extension | Kind |
+|---|---|
+| `.moti` | Title |
+| `.motr` | Transition |
+| `.moef` | Effect |
+| `.motn` | Generator |
 
-특정 폴더만 조사하기:
+Motion discovery does not follow symbolic links.
 
-```json
-{
-  "roots": [
-    "/Users/me/Movies/Motion Templates.localized/Titles"
-  ],
-  "kinds": ["title"],
-  "maxResults": 100
-}
-```
+## Safety behavior
 
-찾은 템플릿 조사:
+- FCPXML input is capped at 10 MB; Motion template input is capped at 20 MB.
+- Custom XML entities, external DTDs, and internal-subset DTDs are rejected.
+- File arguments must be absolute or start with `~/`.
+- Existing `.fcpxml` output is preserved unless `overwrite: true` is explicit.
+- Non-overwrite creation uses a temporary file and an exclusive destination operation.
+- App launching uses `execFile` with argument arrays rather than shell interpolation.
+- Recursive template and bundle searches skip symbolic links and have depth/result bounds.
 
-```json
-{
-  "path": "/Users/me/Movies/Motion Templates.localized/Titles/Custom/Lower Third/Lower Third.moti"
-}
-```
+These measures reduce accidental damage; they are not a security sandbox. Run the MCP under the macOS account and filesystem permissions appropriate for the editing project.
 
-`motion_inspect_template`은 XML root, 템플릿·프로젝트 메타데이터, 태그 개수와 publish 형태의 파라미터 후보를 반환합니다. 파일을 수정하지 않습니다.
-
-## 안전 동작
-
-- FCPXML 입력은 10MB, Motion 템플릿 입력은 20MB로 제한됩니다.
-- custom XML entity, 외부 DTD와 내부 subset DTD를 거부합니다.
-- 기존 출력 파일을 기본적으로 덮어쓰지 않습니다.
-- 비덮어쓰기 저장은 임시 파일과 exclusive hard link로 충돌을 방지합니다.
-- 앱 실행은 `execFile` 인자 배열을 사용하며 셸 interpolation을 사용하지 않습니다.
-- Motion 폴더 검색은 symbolic link를 따라가지 않습니다.
-
-이는 실수 방지 장치이지 보안 샌드박스는 아닙니다. 편집 프로젝트에 적절한 macOS 계정과 파일 권한으로 실행하세요.
-
-## 문제 해결
-
-서버가 연결되지 않을 때:
-
-```bash
-node --version
-npm install
-npm run check
-node /절대/경로/Apple-Pro-Video-MCP/src/index.js
-```
-
-Node는 20 이상이어야 하며 MCP 설정에는 절대 경로를 사용하는 편이 안전합니다.
-
-Final Cut이 열리지 않을 때:
-
-```bash
-/usr/bin/open -a "Final Cut Pro" "/Users/me/Desktop/test.fcpxml"
-```
-
-이 명령이 터미널에서도 실패하면 앱 이름·설치 상태를 먼저 확인합니다.
-
-Motion 템플릿이 안 보일 때는 Finder에서 실제 폴더가 `Motion Templates.localized`인지 확인하고 `roots`에 절대 경로를 직접 전달합니다.
-
-## 개발과 검증
+## Development and verification
 
 ```bash
 npm install
@@ -271,16 +213,24 @@ npm test
 npm run check
 ```
 
-자동 테스트는 XML parser 실패 조건, FCPXML 프레임 시간과 생성, 중복 ID·깨진 참조, 덮어쓰기 보호, `.fcpxmld` 읽기, Motion 검색·검사를 다룹니다. CI에서는 공식 MCP SDK 설치 후 stdio `initialize`와 `tools/list` round trip도 실행합니다.
+Automated coverage includes:
 
-아직 실제 앱에서 확인할 항목:
+- XML entity, attribute, root, and DTD failure modes
+- exact 29.97 fps rational time conversion
+- clip offset and duration generation
+- existing-output protection
+- duplicate resource ID and unresolved reference reporting
+- `.fcpxmld` bundle discovery
+- Motion template listing and generic publish-parameter inspection
+- real stdio MCP initialization, tool listing, and tool calling
 
-- 사용하는 Final Cut Pro 버전에서 생성 XML import
-- Final Cut export/import round trip 보존
-- 실제 Motion 프로젝트의 publish 파라미터 해석
-- Motion 템플릿 생성·수정·설치
+GitHub Actions runs the complete suite on macOS with Node.js 20 and 22.
 
-다음 검증 시작점은 [`memory/CHECKPOINT.md`](memory/CHECKPOINT.md)에 기록합니다.
+## Verification boundary
+
+Automated tests verify the server and generated document structure. They do **not** prove that a specific installed Final Cut Pro version accepts every generated project or that generic Motion XML observations have the same meaning across Motion versions.
+
+The next verification step is to generate a two-clip project on the target Mac, import it into Final Cut Pro, export it again, and retain both files as a round-trip fixture. See [`memory/CHECKPOINT.md`](memory/CHECKPOINT.md).
 
 ## License
 
