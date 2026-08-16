@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const projectRoot = fileURLToPath(new URL('..', import.meta.url));
@@ -46,9 +49,35 @@ function startServer() {
   return { child, send, waitFor, stderr: () => stderr };
 }
 
-test('stdio server initializes, lists eleven tools, and calls old and new tools', async (context) => {
+test('stdio server initializes, lists twelve tools, and calls transcript/edit tools', async (context) => {
+  const fixtureDirectory = await mkdtemp(join(tmpdir(), 'apple-pro-video-server-vibe-'));
+  const mediaPath = join(fixtureDirectory, 'interview.mov');
+  const transcriptPath = join(fixtureDirectory, 'interview.vibe-transcript.json');
+  await writeFile(mediaPath, 'media');
+  await writeFile(transcriptPath, JSON.stringify({
+    schema: 'vibe-video-analyzer/transcript',
+    schemaVersion: 1,
+    createdAt: '2026-08-16T00:00:00Z',
+    media: { path: mediaPath, fileName: 'interview.mov', durationSeconds: 5 },
+    segments: [{
+      id: 'segment-1',
+      startSeconds: 1,
+      endSeconds: 2,
+      durationSeconds: 1,
+      text: 'hello world',
+      words: [
+        { text: 'hello', startSeconds: 1, endSeconds: 1.4 },
+        { text: 'world', startSeconds: 1.41, endSeconds: 2 }
+      ]
+    }],
+    summary: { segmentCount: 1, wordCount: 2 }
+  }));
+
   const server = startServer();
-  context.after(() => server.child.kill('SIGTERM'));
+  context.after(async () => {
+    server.child.kill('SIGTERM');
+    await rm(fixtureDirectory, { recursive: true, force: true });
+  });
 
   server.send({
     jsonrpc: '2.0',
@@ -62,13 +91,20 @@ test('stdio server initializes, lists eleven tools, and calls old and new tools'
   });
   const initialized = await server.waitFor(1);
   assert.equal(initialized.result.serverInfo.name, 'apple-pro-video-mcp');
-  assert.equal(initialized.result.serverInfo.version, '0.2.0');
+  assert.equal(initialized.result.serverInfo.version, '0.3.0');
 
   server.send({ jsonrpc: '2.0', method: 'notifications/initialized', params: {} });
   server.send({ jsonrpc: '2.0', id: 2, method: 'tools/list', params: {} });
   const listed = await server.waitFor(2);
-  assert.equal(listed.result.tools.length, 11);
-  for (const name of ['highlight_rank', 'edit_plan_build', 'subtitle_segment', 'subtitle_write_srt', 'fcpxml_create_project']) {
+  assert.equal(listed.result.tools.length, 12);
+  for (const name of [
+    'vibe_transcript_import',
+    'highlight_rank',
+    'edit_plan_build',
+    'subtitle_segment',
+    'subtitle_write_srt',
+    'fcpxml_create_project'
+  ]) {
     assert.ok(listed.result.tools.some((tool) => tool.name === name), `missing ${name}`);
   }
 
@@ -129,6 +165,20 @@ test('stdio server initializes, lists eleven tools, and calls old and new tools'
   assert.equal(subtitled.result.isError, undefined);
   assert.equal(subtitled.result.structuredContent.cueCount, 1);
   assert.match(subtitled.result.structuredContent.srt, /hello world/);
+
+  server.send({
+    jsonrpc: '2.0',
+    id: 6,
+    method: 'tools/call',
+    params: {
+      name: 'vibe_transcript_import',
+      arguments: { path: transcriptPath }
+    }
+  });
+  const imported = await server.waitFor(6);
+  assert.equal(imported.result.isError, undefined);
+  assert.equal(imported.result.structuredContent.summary.wordCount, 2);
+  assert.equal(imported.result.structuredContent.editPlanSegments[0].path, mediaPath);
 
   server.child.stdin.end();
 });
