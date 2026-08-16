@@ -5,9 +5,10 @@ import { createFcpxmlProject, inspectFcpxml, validateFcpxml } from './fcpxml.js'
 import { inspectMotionTemplate, listMotionTemplates } from './motion.js';
 import { segmentSubtitles, writeSubtitleSrt } from './subtitles.js';
 import { openFcpxmlInFinalCut, systemCapabilities } from './system.js';
+import { importVibeTranscript } from './transcripts.js';
 
 const SERVER_NAME = 'apple-pro-video-mcp';
-const SERVER_VERSION = '0.2.0';
+const SERVER_VERSION = '0.3.0';
 
 const pathOrXmlSchema = z.object({
   path: z.string().min(1).optional().describe('Absolute path or ~/ path to .fcpxml or .fcpxmld.'),
@@ -92,6 +93,17 @@ export function createServer() {
     inputSchema: z.object({}),
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false }
   }, async () => systemCapabilities());
+
+  register(server, 'vibe_transcript_import', {
+    title: 'Import a Vibe Video Analyzer transcript',
+    description: 'Read a vibe-video-analyzer/transcript v1 JSON export, preserve word timestamps, and produce candidate ranges plus edit-plan segments for highlight, edit, and subtitle tools.',
+    inputSchema: z.object({
+      path: z.string().min(1).describe('Absolute path or ~/ path to a Vibe transcript JSON file.'),
+      mediaPath: z.string().min(1).optional().describe('Optional local media-path override when the JSON came from another machine.'),
+      allowMissingMedia: z.boolean().default(false)
+    }),
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false }
+  }, importVibeTranscript);
 
   register(server, 'highlight_rank', {
     title: 'Rank edit highlight candidates',
