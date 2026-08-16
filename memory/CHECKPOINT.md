@@ -2,7 +2,7 @@
 
 ## The story so far
 
-Apple Pro Video MCP is now version 0.2.0 with eleven tools. In addition to capability discovery, FCPXML generation/inspection, Final Cut launching, and read-only Motion inspection, it now has a deterministic editing foundation: `highlight_rank`, `edit_plan_build`, `subtitle_segment`, and `subtitle_write_srt`. The pipeline can rank caller-assessed candidates, assemble source ranges, retime supplied word timestamps, create readable subtitle cues, and write a protected SRT sidecar. The code-bearing revision passed GitHub Actions on macOS with Node.js 20 and 22.
+Apple Pro Video MCP is now version 0.2.0 with eleven tools. In addition to capability discovery, FCPXML generation/inspection, Final Cut launching, and read-only Motion inspection, it now has a deterministic editing foundation: `highlight_rank`, `edit_plan_build`, `subtitle_segment`, and `subtitle_write_srt`. The pipeline can rank caller-assessed candidates, assemble source ranges, retime supplied word timestamps, create readable subtitle cues, and write a protected SRT sidecar. The code-bearing revision passed GitHub Actions on macOS with Node.js 20 and 22; later documentation and Ballast workflow changes continue to run the same suite.
 
 ## Decided
 
@@ -23,10 +23,10 @@ Apple Pro Video MCP is now version 0.2.0 with eleven tools. In addition to capab
 
 ## Next first action
 
-On the target Mac or through Grok, obtain word-level timestamps for a short interview clip, follow `docs/EDITING_PIPELINE.ko.md` to run `highlight_rank` → `edit_plan_build` → `fcpxml_create_project` and `subtitle_segment` → `subtitle_write_srt`, then import the generated FCPXML and SRT into a disposable Final Cut library and record cut/subtitle alignment under `test/fixtures/roundtrip/`.
+On the target Mac or through Grok, obtain word-level timestamps for a short interview clip, follow `docs/EDITING_PIPELINE.ko.md` to run `highlight_rank` → `edit_plan_build` → `fcpxml_create_project` and `subtitle_segment` → `subtitle_write_srt`, then follow `.claude/skills/fcpxml-roundtrip/SKILL.md` to import the generated FCPXML and SRT into a disposable Final Cut library and record cut/subtitle alignment under `test/fixtures/roundtrip/`.
 
 ## Tried
 
 - The initial repository contained only a bootstrap README; the MCP implementation was built on `agent/initial-mcp`.
 - Automated tests prove ranking, retiming, segmentation, SRT rendering, protected writes, and MCP registration/calls, but cannot prove the quality of caller ratings or ASR timestamps.
-- Automated and CI evidence cannot substitute for seeing Final Cut Pro accept and align the generated FCPXML and SRT; that boundary is encoded in rules and knowledge files.
+- Automated and CI evidence cannot substitute for seeing Final Cut Pro accept and align the generated FCPXML and SRT; that boundary is encoded in rules, skills, and knowledge files.
