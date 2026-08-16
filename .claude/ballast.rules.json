@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "app-claims-need-real-app-evidence",
+      "title": "Do not overclaim Final Cut or Motion compatibility",
+      "when": {
+        "keywords": ["Final Cut", "Motion", "FCPXML", "works", "working", "verified", "지원", "동작", "검증"]
+      },
+      "action": "inject",
+      "body": "Separate repository-test evidence from real-app evidence. Automated XML/unit/MCP tests may prove code behavior, but never describe Final Cut Pro or Motion compatibility as verified until the relevant import/export or template round trip has been observed on an actual Mac."
+    },
+    {
+      "id": "preserve-user-projects",
+      "title": "Preserve user media and edit projects by default",
+      "when": {
+        "keywords": ["overwrite", "delete", "replace", "import", "export", "project", "library", "덮어", "삭제", "프로젝트"]
+      },
+      "action": "inject",
+      "body": "Treat user media, libraries, projects, templates, subtitles, transcripts, and exports as valuable data. Default to non-destructive copies and unique output paths. Require an explicit overwrite/delete instruction before replacing existing artifacts."
+    },
+    {
+      "id": "no-shell-interpolation",
+      "title": "Never interpolate user paths into shell strings",
+      "when": {
+        "keywords": ["exec", "spawn", "open", "osascript", "path", "command", "명령", "경로"]
+      },
+      "action": "inject",
+      "body": "When invoking local commands, use executable-plus-argument-array APIs. Never concatenate a user-controlled file path into a shell command string."
+    },
+    {
+      "id": "mcp-change-needs-roundtrip-test",
+      "title": "MCP changes need protocol verification",
+      "when": {
+        "keywords": ["MCP", "tool", "server", "transport", "도구", "서버"]
+      },
+      "action": "inject",
+      "body": "Any MCP tool or transport change must preserve a passing stdio initialization, tools/list, and at least one relevant tools/call path before it is considered complete."
+    },
+    {
+      "id": "motion-mutation-gate",
+      "title": "Gate Motion mutation behind real fixtures",
+      "when": {
+        "keywords": [".moti", ".motr", ".moef", ".motn", "Motion template", "Motion 템플릿", "publish parameter"]
+      },
+      "action": "inject",
+      "body": "Do not introduce generic Motion project mutation from guessed XML structure. First capture representative real templates and a successful Motion/Final Cut round trip, then make the mutation schema-specific and tested."
+    },
+    {
+      "id": "analysis-inputs-are-not-observations",
+      "title": "Do not claim the MCP watched or transcribed media",
+      "when": {
+        "keywords": ["highlight", "score", "transcript", "transcribe", "ASR", "좋은 부분", "전사", "점수", "영상 분석"]
+      },
+      "action": "inject",
+      "body": "highlight_rank and edit_plan_build operate on supplied assessments, ranges, and timestamps. vibe_transcript_import proves only that a JSON artifact was parsed and normalized. Do not say the MCP watched, understood, or accurately transcribed media unless the Vibe runtime or another media-analysis tool actually ran and its evidence is recorded."
+    },
+    {
+      "id": "vibe-integration-is-schema-boundary",
+      "title": "Keep Vibe integration behind the versioned exchange contract",
+      "when": {
+        "keywords": ["Vibe", "vibe_transcript_import", "vibe-video-analyzer/transcript", "transcribe_cli.py", "VibeCoding_VideoAnalyzer"]
+      },
+      "action": "inject",
+      "body": "Integrate Vibe through vibe-video-analyzer/transcript schema v1. Do not couple the Node MCP to Vibe GUI state or import its Python runtime. Preserve Vibe's existing timing, playback, and word-highlight code unless a separate isolated experiment with real-media validation is explicitly requested."
+    },
+    {
+      "id": "subtitle-generation-is-not-finalcut-import",
+      "title": "Separate SRT generation from Final Cut subtitle compatibility",
+      "when": {
+        "keywords": ["subtitle", "caption", "SRT", "자막", "캡션"]
+      },
+      "action": "inject",
+      "body": "Repository tests may confirm cue segmentation, SRT rendering, and protected file writes. Do not claim subtitle alignment or Final Cut import compatibility until the generated SRT has been imported with the generated timeline and inspected on an actual Mac."
+    }
+  ]
+}
