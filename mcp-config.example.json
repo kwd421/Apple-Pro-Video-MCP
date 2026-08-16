@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "apple-pro-video": {
+      "command": "node",
+      "args": [
+        "/ABSOLUTE/PATH/TO/Apple-Pro-Video-MCP/src/index.js"
+      ]
+    }
+  }
+}
