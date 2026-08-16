@@ -46,7 +46,7 @@ function startServer() {
   return { child, send, waitFor, stderr: () => stderr };
 }
 
-test('stdio server initializes, lists seven tools, and calls a tool', async (context) => {
+test('stdio server initializes, lists eleven tools, and calls old and new tools', async (context) => {
   const server = startServer();
   context.after(() => server.child.kill('SIGTERM'));
 
@@ -62,12 +62,15 @@ test('stdio server initializes, lists seven tools, and calls a tool', async (con
   });
   const initialized = await server.waitFor(1);
   assert.equal(initialized.result.serverInfo.name, 'apple-pro-video-mcp');
+  assert.equal(initialized.result.serverInfo.version, '0.2.0');
 
   server.send({ jsonrpc: '2.0', method: 'notifications/initialized', params: {} });
   server.send({ jsonrpc: '2.0', id: 2, method: 'tools/list', params: {} });
   const listed = await server.waitFor(2);
-  assert.equal(listed.result.tools.length, 7);
-  assert.ok(listed.result.tools.some((tool) => tool.name === 'fcpxml_create_project'));
+  assert.equal(listed.result.tools.length, 11);
+  for (const name of ['highlight_rank', 'edit_plan_build', 'subtitle_segment', 'subtitle_write_srt', 'fcpxml_create_project']) {
+    assert.ok(listed.result.tools.some((tool) => tool.name === name), `missing ${name}`);
+  }
 
   server.send({
     jsonrpc: '2.0',
@@ -80,9 +83,52 @@ test('stdio server initializes, lists seven tools, and calls a tool', async (con
       }
     }
   });
-  const called = await server.waitFor(3);
-  assert.equal(called.result.isError, undefined);
-  assert.equal(called.result.structuredContent.valid, true);
+  const validated = await server.waitFor(3);
+  assert.equal(validated.result.isError, undefined);
+  assert.equal(validated.result.structuredContent.valid, true);
+
+  server.send({
+    jsonrpc: '2.0',
+    id: 4,
+    method: 'tools/call',
+    params: {
+      name: 'highlight_rank',
+      arguments: {
+        profile: 'interview_short',
+        targetDurationSeconds: 30,
+        candidates: [{
+          id: 'answer',
+          sourceId: 'interview',
+          startSeconds: 4,
+          endSeconds: 12,
+          text: 'A concise answer',
+          metrics: { hook: 80, payoff: 90, clarity: 90, emotion: 60, novelty: 70, editability: 90, visual: 50 }
+        }]
+      }
+    }
+  });
+  const ranked = await server.waitFor(4);
+  assert.equal(ranked.result.isError, undefined);
+  assert.equal(ranked.result.structuredContent.ranked[0].id, 'answer');
+
+  server.send({
+    jsonrpc: '2.0',
+    id: 5,
+    method: 'tools/call',
+    params: {
+      name: 'subtitle_segment',
+      arguments: {
+        words: [
+          { text: 'hello', startSeconds: 0, endSeconds: 0.4 },
+          { text: 'world', startSeconds: 0.41, endSeconds: 0.9 }
+        ]
+      }
+    }
+  });
+  const subtitled = await server.waitFor(5);
+  assert.equal(subtitled.result.isError, undefined);
+  assert.equal(subtitled.result.structuredContent.cueCount, 1);
+  assert.match(subtitled.result.structuredContent.srt, /hello world/);
 
   server.child.stdin.end();
 });
