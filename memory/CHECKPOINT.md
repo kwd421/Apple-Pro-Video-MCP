@@ -1,8 +1,8 @@
-# Checkpoint — initial Apple Pro Video MCP — 2026-08-16
+# Checkpoint — editing foundation and subtitles — 2026-08-16
 
 ## The story so far
 
-An MCP TypeScript SDK v2 stdio server exposes seven tools for capability discovery, FCPXML validation/inspection/project generation, opening FCPXML in Final Cut Pro, and read-only Motion template discovery/inspection. Core XML/FCPXML/Motion tests and the dependency-backed MCP protocol test are covered by GitHub Actions. A lightweight Ballast-inspired workflow is now embedded in the repository through `AGENTS.md`, a rule catalog, reusable verification skills, a decision ledger, checkpointing, and labeled knowledge files.
+Apple Pro Video MCP is now version 0.2.0 with eleven tools. In addition to capability discovery, FCPXML generation/inspection, Final Cut launching, and read-only Motion inspection, it now has a deterministic editing foundation: `highlight_rank`, `edit_plan_build`, `subtitle_segment`, and `subtitle_write_srt`. The pipeline can rank caller-assessed candidates, assemble source ranges, retime supplied word timestamps, create readable subtitle cues, and write a protected SRT sidecar. The code-bearing revision passed GitHub Actions on macOS with Node.js 20 and 22.
 
 ## Decided
 
@@ -10,20 +10,23 @@ An MCP TypeScript SDK v2 stdio server exposes seven tools for capability discove
 - D-002: FCPXML may be written; Motion remains read-only until real-app round trips pass.
 - D-003: no shell interpolation for paths or launches.
 - D-004: describe validation as structural, not full Apple DTD conformance.
-- Ballast is a development/verification convention only; it is not added as a runtime dependency of the MCP.
-- Real Final Cut Pro or Motion behavior must stay labeled `unverified` until observed on an actual Mac.
+- D-005: highlight scores are transparent calculations over caller-supplied assessments; the MCP does not claim to watch video.
+- D-006: captions first ship as a protected SRT sidecar; guessed FCPXML caption/title mutation remains gated.
+- D-007: transcript words are retimed through the same explicit edit plan used to create FCPXML clips.
+- Ballast remains a development/verification convention, not a runtime dependency.
 
 ## Waiting on the user
 
-- Run a generated FCPXML through Final Cut Pro on a Mac and export it again for a round-trip fixture.
-- Provide one representative custom Motion template for schema-specific inspection tests.
+- On a Mac with Final Cut Pro, provide one short source clip or two small clips and run the complete FCPXML + SRT import check.
+- Choose or supply an ASR capable of producing Korean word-level timestamps; the MCP currently consumes timestamps but does not generate them.
+- Provide one representative custom Motion template later for schema-specific inspection tests.
 
 ## Next first action
 
-On the target Mac, follow `.claude/skills/fcpxml-roundtrip/SKILL.md`: generate a disposable two-clip FCPXML, import it into Final Cut Pro, export it again, and retain both files plus the inspection outputs under `test/fixtures/roundtrip/`.
+On the target Mac or through Grok, obtain word-level timestamps for a short interview clip, follow `docs/EDITING_PIPELINE.ko.md` to run `highlight_rank` → `edit_plan_build` → `fcpxml_create_project` and `subtitle_segment` → `subtitle_write_srt`, then import the generated FCPXML and SRT into a disposable Final Cut library and record cut/subtitle alignment under `test/fixtures/roundtrip/`.
 
 ## Tried
 
-- The repository initially contained only a bootstrap README and no runnable implementation.
-- A stale temporary writer was stopped; the final files were rebuilt in a clean directory before publication.
-- Automated and CI evidence cannot substitute for seeing Final Cut Pro or Motion accept and round-trip the artifacts; that boundary is now encoded in agent rules and knowledge files.
+- The initial repository contained only a bootstrap README; the MCP implementation was built on `agent/initial-mcp`.
+- Automated tests prove ranking, retiming, segmentation, SRT rendering, protected writes, and MCP registration/calls, but cannot prove the quality of caller ratings or ASR timestamps.
+- Automated and CI evidence cannot substitute for seeing Final Cut Pro accept and align the generated FCPXML and SRT; that boundary is encoded in rules and knowledge files.
