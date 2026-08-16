@@ -2,7 +2,7 @@
 
 ## The story so far
 
-Apple Pro Video MCP is now version 0.2.0 with eleven tools. In addition to capability discovery, FCPXML generation/inspection, Final Cut launching, and read-only Motion inspection, it now has a deterministic editing foundation: `highlight_rank`, `edit_plan_build`, `subtitle_segment`, and `subtitle_write_srt`. The pipeline can rank caller-assessed candidates, assemble source ranges, retime supplied word timestamps, create readable subtitle cues, and write a protected SRT sidecar. The code-bearing revision passed GitHub Actions on macOS with Node.js 20 and 22; later documentation and Ballast workflow changes continue to run the same suite.
+Apple Pro Video MCP is now version 0.2.0 with eleven tools. In addition to capability discovery, FCPXML generation/inspection, Final Cut launching, and read-only Motion inspection, it now has a deterministic editing foundation: `highlight_rank`, `edit_plan_build`, `subtitle_segment`, and `subtitle_write_srt`. The pipeline can rank caller-assessed candidates, assemble source ranges, retime supplied word timestamps, create readable subtitle cues, and write a protected SRT sidecar. The code-bearing revision passed GitHub Actions on macOS with Node.js 20 and 22; later documentation and Ballast workflow changes continue to run the same suite. The Korean editing guide now includes a copy-ready Grok handoff prompt.
 
 ## Decided
 
@@ -23,7 +23,7 @@ Apple Pro Video MCP is now version 0.2.0 with eleven tools. In addition to capab
 
 ## Next first action
 
-On the target Mac or through Grok, obtain word-level timestamps for a short interview clip, follow `docs/EDITING_PIPELINE.ko.md` to run `highlight_rank` → `edit_plan_build` → `fcpxml_create_project` and `subtitle_segment` → `subtitle_write_srt`, then follow `.claude/skills/fcpxml-roundtrip/SKILL.md` to import the generated FCPXML and SRT into a disposable Final Cut library and record cut/subtitle alignment under `test/fixtures/roundtrip/`.
+On the target Mac or through Grok, open `docs/EDITING_PIPELINE.ko.md`, use its Grok handoff prompt to obtain word-level timestamps and run `highlight_rank` → `edit_plan_build` → `fcpxml_create_project` and `subtitle_segment` → `subtitle_write_srt`, then follow `.claude/skills/fcpxml-roundtrip/SKILL.md` to import the generated FCPXML and SRT into a disposable Final Cut library and record cut/subtitle alignment under `test/fixtures/roundtrip/`.
 
 ## Tried
 
