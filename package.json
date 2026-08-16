@@ -1,7 +1,7 @@
 {
   "name": "apple-pro-video-mcp",
-  "version": "0.1.0",
-  "description": "Local MCP server for Final Cut Pro FCPXML and Motion template workflows on macOS.",
+  "version": "0.2.0",
+  "description": "Local MCP server for Final Cut Pro FCPXML, edit planning, subtitles, and Motion template workflows on macOS.",
   "type": "module",
   "private": true,
   "license": "MIT",
@@ -15,7 +15,7 @@
     "start": "node src/index.js",
     "inspect": "npx @modelcontextprotocol/inspector node src/index.js",
     "test": "node --test test/*.test.mjs",
-    "lint": "node --check src/index.js && node --check src/server.js && node --check src/fcpxml.js && node --check src/motion.js && node --check src/system.js && node --check src/xml.js && node --check src/paths.js",
+    "lint": "node --check src/index.js && node --check src/server.js && node --check src/editing.js && node --check src/subtitles.js && node --check src/fcpxml.js && node --check src/motion.js && node --check src/system.js && node --check src/xml.js && node --check src/paths.js",
     "check": "npm run lint && npm test"
   },
   "keywords": [
@@ -23,6 +23,8 @@
     "final-cut-pro",
     "motion",
     "fcpxml",
+    "subtitles",
+    "video-editing",
     "macos"
   ],
   "dependencies": {
